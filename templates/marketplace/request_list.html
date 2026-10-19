@@ -1,1 +1,96 @@
-{% extends 'base.html' %}{% block title %}Коммерческие запросы — BaaTap KG{% endblock %}{% block content %}<section class="page-hero"><div class="container"><div class="eyebrow">BaaTap KG / Каталог</div><h1>{% if request.LANGUAGE_CODE == 'ky' %}Коммерциялык суроолор{% else %}Коммерческие запросы{% endif %}</h1><p>{% if request.LANGUAGE_CODE == 'ky' %}Компаниялар эмнени издеп жатканын көрүп, ылайыктуу суроолорго сунуш жөнөтүңүз.{% else %}Посмотрите, что ищут компании, и отправьте предложение по подходящему запросу.{% endif %}</p></div></section><section class="section"><div class="container"><form class="filter-bar" method="get"><input type="search" name="q" value="{{ q }}" placeholder="Поиск по запросам..."><select name="category"><option value="">Все категории</option>{% for c in categories %}<option value="{{ c.id }}" {% if selected_category == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name_ru }}</option>{% endfor %}</select><input name="city" value="{{ city }}" placeholder="Город"><button class="btn btn-primary" type="submit">Найти</button></form><div class="request-grid">{% for item in requests %}<article class="request-card"><div class="request-meta"><span class="pill">{{ item.category.name_ru }}</span><span>{{ item.created_at|date:'d.m.Y' }}</span></div><h3><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h3><p>{{ item.description|truncatechars:150 }}</p><div class="request-card-bottom"><span>⌖ {{ item.city|default:'Кыргызстан' }}</span><span>{{ item.offers.count }} предлож.</span></div></article>{% empty %}<div class="empty-state">По вашему запросу ничего не найдено. Попробуйте изменить фильтры или <a href="{% url 'request_create' %}">создайте первый запрос</a>.</div>{% endfor %}</div></div></section>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Коммерческие запросы — BaaTap KG{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">BaaTap KG / Каталог закупок</div>
+    <h1>{% if request.LANGUAGE_CODE == 'ky' %}Коммерциялык суроолор{% else %}Коммерческие запросы{% endif %}</h1>
+    <p>{% if request.LANGUAGE_CODE == 'ky' %}Компаниялардын суроо-талаптарын көрүп, сунуш жөнөтүңүз.{% else %}Находите заявки компаний, сравнивайте бюджеты и предлагайте свои условия.{% endif %}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <form class="filter-bar" method="get">
+      <input type="search" name="q" value="{{ q }}" placeholder="Что ищете? Например, стулья или сайт">
+      <select name="category">
+        <option value="">Все категории</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if selected_category == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name_ru }}</option>
+        {% endfor %}
+      </select>
+      <input name="city" value="{{ city }}" placeholder="Город">
+      <button class="btn btn-primary" type="submit">Найти заявки</button>
+    </form>
+
+    <div class="request-grid procurement-grid">
+      {% for item in requests %}
+      <article class="request-card procurement-card">
+        <div class="request-meta procurement-meta">
+          <span class="pill">{{ item.category.name_ru }}</span>
+          <span class="procurement-published">Опубликовано {{ item.created_at|date:'d.m.Y H:i' }}</span>
+        </div>
+
+        <h3 class="procurement-title">
+          <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+        </h3>
+
+        <div class="procurement-organization">
+          <span class="procurement-label">Заказчик</span>
+          <strong>{{ item.buyer.company_name|default:item.buyer.get_full_name|default:item.buyer.username }}</strong>
+        </div>
+
+        <div class="procurement-budget">
+          <span class="procurement-label">Планируемый бюджет</span>
+          <strong>
+            {% if item.budget_min != None or item.budget_max != None %}
+              {% if item.budget_min != None and item.budget_max != None %}
+                {{ item.budget_min|floatformat:"-2" }} – {{ item.budget_max|floatformat:"-2" }} сом
+              {% elif item.budget_min != None %}
+                От {{ item.budget_min|floatformat:"-2" }} сом
+              {% else %}
+                До {{ item.budget_max|floatformat:"-2" }} сом
+              {% endif %}
+            {% else %}
+              Цена по предложению поставщика
+            {% endif %}
+          </strong>
+        </div>
+
+        <p class="procurement-description">{{ item.description|truncatechars:180 }}</p>
+
+        {% if item.quantity %}
+        <div class="procurement-quantity">
+          <span class="procurement-label">Количество / объём</span>
+          <span>{{ item.quantity }}</span>
+        </div>
+        {% endif %}
+
+        <div class="procurement-dates">
+          <div>
+            <span class="procurement-label">Дата публикации</span>
+            <strong>{{ item.created_at|date:'d.m.Y' }}</strong>
+          </div>
+          <div>
+            <span class="procurement-label">Срок подачи предложений</span>
+            <strong>{% if item.deadline %}{{ item.deadline|date:'d.m.Y' }}{% else %}Не указан{% endif %}</strong>
+          </div>
+        </div>
+
+        <div class="procurement-bottom">
+          <span>⌖ {{ item.city|default:'Кыргызстан' }}</span>
+          <span>Предложений: {{ item.offers.count }}</span>
+        </div>
+
+        <a class="btn btn-primary btn-block procurement-action" href="{{ item.get_absolute_url }}">Посмотреть заявку и условия →</a>
+      </article>
+      {% empty %}
+      <div class="empty-state">
+        Заявок пока нет. Измените параметры поиска или
+        <a href="{% url 'request_create' %}">создайте первую заявку</a>.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

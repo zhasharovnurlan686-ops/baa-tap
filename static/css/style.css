@@ -46,3 +46,282 @@
 .footer .brand {
     gap: 8px !important;
 }
+
+/* BaaTap KG - procurement request cards */
+.procurement-grid {
+  align-items: stretch;
+}
+
+.procurement-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.procurement-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.procurement-title {
+  margin: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.procurement-organization {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.procurement-organization strong {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.procurement-label {
+  display: block;
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 3px;
+}
+
+.procurement-budget {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--surface-soft, #f1f5f9);
+}
+
+.procurement-budget strong {
+  display: block;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  color: var(--primary, #0f766e);
+}
+
+.procurement-description {
+  margin: 0;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.procurement-quantity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.procurement-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.procurement-dates > div {
+  min-width: 0;
+}
+
+.procurement-dates strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.procurement-bottom {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, #e2e8f0);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.procurement-action {
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .procurement-dates {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .procurement-budget {
+    padding: 12px;
+  }
+}
+
+/* === BaaTap KG: свет€щийс€ бюджет за€вки === */
+.procurement-budget strong {
+    display: inline-block;
+    margin-top: 7px;
+    color: #58d9ff !important;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-shadow:
+        0 0 5px rgba(88, 217, 255, 0.85),
+        0 0 12px rgba(28, 169, 255, 0.75),
+        0 0 24px rgba(28, 169, 255, 0.45);
+    animation: baatap-budget-glow 2s ease-in-out infinite alternate;
+}
+
+.procurement-budget {
+    padding: 14px 16px;
+    margin: 14px 0;
+    background: rgba(28, 169, 255, 0.07);
+    border: 1px solid rgba(88, 217, 255, 0.4);
+    border-radius: 12px;
+    box-shadow:
+        0 0 10px rgba(28, 169, 255, 0.12),
+        inset 0 0 12px rgba(28, 169, 255, 0.04);
+}
+
+@keyframes baatap-budget-glow {
+    from {
+        text-shadow:
+            0 0 4px rgba(88, 217, 255, 0.6),
+            0 0 10px rgba(28, 169, 255, 0.45);
+    }
+    to {
+        text-shadow:
+            0 0 7px rgba(88, 217, 255, 1),
+            0 0 16px rgba(28, 169, 255, 0.9),
+            0 0 28px rgba(28, 169, 255, 0.65);
+    }
+}
+
+
+/* BaaTap KG Ч premium blue budget */
+.procurement-budget {
+    position: relative;
+    padding: 18px 20px;
+    margin: 18px 0;
+    overflow: hidden;
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    border-radius: 16px;
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 0.10),
+        rgba(59, 130, 246, 0.04) 55%,
+        rgba(96, 165, 250, 0.10)
+    );
+    box-shadow:
+        0 4px 18px rgba(37, 99, 235, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.procurement-budget:hover {
+    border-color: rgba(59, 130, 246, 0.65);
+    box-shadow:
+        0 0 22px rgba(37, 99, 235, 0.18),
+        0 8px 28px rgba(37, 99, 235, 0.10);
+}
+
+.procurement-budget .procurement-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.procurement-budget strong {
+    display: inline-block;
+    color: #60a5fa !important;
+    font-size: clamp(21px, 2vw, 27px);
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -0.5px;
+    text-shadow:
+        0 0 8px rgba(59, 130, 246, 0.35),
+        0 0 20px rgba(37, 99, 235, 0.18);
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* BaaTap KG Ч насыщенный синий бюджет на белом фоне */
+.procurement-budget {
+    position: relative;
+    padding: 20px 22px;
+    margin: 18px 0;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    border: 1px solid #bfdbfe;
+    border-left: 5px solid #2563eb;
+    border-radius: 14px;
+    box-shadow:
+        0 5px 18px rgba(37, 99, 235, 0.12),
+        0 0 24px rgba(59, 130, 246, 0.08);
+    transition: all 0.25s ease;
+}
+
+.procurement-budget:hover {
+    border-color: #60a5fa;
+    border-left-color: #1d4ed8;
+    box-shadow:
+        0 8px 26px rgba(37, 99, 235, 0.19),
+        0 0 30px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.procurement-budget .procurement-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #475569 !important;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
+.procurement-budget strong {
+    display: inline-block;
+    color: #0754d1 !important;
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 850;
+    line-height: 1.4;
+    letter-spacing: -0.6px;
+    text-shadow:
+        0 0 1px rgba(29, 78, 216, 0.35),
+        0 2px 12px rgba(37, 99, 235, 0.22);
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* BaaTap KG Ч простой чЄрный бюджет */
+.procurement-budget {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-left: 3px solid #111827 !important;
+    border-radius: 12px;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.procurement-budget:hover {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.procurement-budget strong {
+    color: #111111 !important;
+    text-shadow: none !important;
+    animation: none !important;
+    font-weight: 700;
+}
+
