@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Коммерческие предложения — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <a href="{% url 'request_detail' business_request.pk %}">← Вернуться к заявке</a>
+    <h1>Коммерческие предложения</h1>
+    <div class="dashboard-panel">
+      <h2>{{ business_request.title }}</h2>
+      <p>{{ business_request.description }}</p>
+      {% for offer in offers %}
+      <div class="dashboard-row">
+        <div>
+          <strong>{{ offer.supplier.company_name|default:offer.supplier.username }}</strong>
+          <p>Цена: {{ offer.price|floatformat:2 }} сом</p>
+          <p>Срок поставки: {{ offer.delivery_days }} дн.</p>
+          <p>{{ offer.details|default:"Условия не указаны" }}</p>
+          <p>Статус: {{ offer.get_status_display|default:offer.status }}</p>
+        </div>
+        {% if offer.status == "pending" %}
+        <form method="post" action="{% url 'accept_offer' offer.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit">Принять и создать заказ</button>
+        </form>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p>Поставщики ещё не отправили предложения.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

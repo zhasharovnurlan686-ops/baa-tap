@@ -39,6 +39,18 @@ class BusinessRequest(models.Model):
     def get_absolute_url(self): return reverse("request_detail", kwargs={"pk": self.pk})
 
 class Offer(models.Model):
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pending", "Ожидает решения"),
+            ("accepted", "Принято покупателем"),
+            ("rejected", "Отклонено"),
+        ],
+        default="pending",
+        verbose_name="Статус предложения",
+    )
+
     request = models.ForeignKey(BusinessRequest, on_delete=models.CASCADE, related_name="offers")
     supplier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="offers")
     price = models.DecimalField(max_digits=12, decimal_places=2)
@@ -52,3 +64,157 @@ class Offer(models.Model):
         verbose_name = "Предложение поставщика"
         verbose_name_plural = "Предложения поставщиков"
     def __str__(self): return f"{self.request.title} — {self.price} сом"
+
+
+class SupplierListing(models.Model):
+    supplier = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="supplier_listings",
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        related_name="supplier_listings",
+    )
+    title = models.CharField(max_length=180)
+    description = models.TextField()
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    quantity = models.CharField(max_length=120, blank=True)
+    city = models.CharField(max_length=80, blank=True)
+    image_url = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+    deadline = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Объявление поставщика"
+        verbose_name_plural = "Объявления поставщиков"
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse(
+            "supplier_listing_detail",
+            kwargs={"pk": self.pk},
+        )
+class Order(models.Model):
+
+    business_request = models.ForeignKey(
+        "BusinessRequest",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
+        verbose_name="Заявка покупателя",
+    )
+    offer = models.ForeignKey(
+        "Offer",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
+        verbose_name="Коммерческое предложение",
+    )
+
+    class Status(models.TextChoices):
+        NEW = "new", "New"
+        CONFIRMED = "confirmed", "Confirmed"
+        PROCESSING = "processing", "Processing"
+        SHIPPED = "shipped", "Shipped"
+        COMPLETED = "completed", "Completed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="purchase_orders",
+    )
+    supplier = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="received_orders",
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    total_amount = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0,
+    )
+    buyer_note = models.TextField(blank=True, max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Wholesale order"
+        verbose_name_plural = "Wholesale orders"
+
+    def __str__(self):
+        return f"Order #{self.pk} ({self.get_status_display()})"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+    listing = models.ForeignKey(
+        SupplierListing,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_items",
+    )
+    title = models.CharField(max_length=180)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    line_total = models.DecimalField(max_digits=14, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Wholesale order item"
+        verbose_name_plural = "Wholesale order items"
+
+    def __str__(self):
+        return f"{self.title} x {self.quantity}"
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="baatap_notifications",
+        verbose_name="Получатель",
+    )
+    order = models.ForeignKey(
+        "Order",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="notifications",
+        verbose_name="Заказ",
+    )
+    message = models.CharField(max_length=500, verbose_name="Сообщение")
+    is_read = models.BooleanField(default=False, verbose_name="Прочитано")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
+
+    def __str__(self):
+        return f"{self.recipient}: {self.message[:60]}"

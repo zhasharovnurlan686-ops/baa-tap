@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Заказ №{{ order.pk }} — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <a href="{% url 'order_list' %}">← Все заказы</a>
+    <h1>Заказ №{{ order.pk }}</h1>
+    <div class="dashboard-panel">
+      <p><strong>Статус:</strong> {{ order.get_status_display }}</p>
+      <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+      <p><strong>Покупатель:</strong> {{ order.buyer.company_name|default:order.buyer.username }}</p>
+      <p><strong>Поставщик:</strong> {{ order.supplier.company_name|default:order.supplier.username }}</p>
+      <h2>Состав заказа</h2>
+      {% for item in order.items.all %}
+      <div class="dashboard-row">
+        <span class="dashboard-row-main">
+          <b>{{ item.title }}</b>
+          <small>{{ item.quantity }} шт. × {{ item.unit_price|floatformat:2 }} сом</small>
+        </span>
+        <span class="row-end">{{ item.line_total|floatformat:2 }} сом</span>
+      </div>
+      {% empty %}
+      <p>В заказе пока нет товаров.</p>
+      {% endfor %}
+      <h2>Итого: {{ order.total_amount|floatformat:2 }} сом</h2>
+      {% if order.buyer_note %}
+      <p><strong>Комментарий покупателя:</strong> {{ order.buyer_note|linebreaksbr }}</p>
+      {% endif %}
+      {% if allowed_statuses %}
+      <form method="post" action="{% url 'order_update_status' order.pk %}">
+        {% csrf_token %}
+        <label for="order-status">Изменить статус заказа</label>
+        <select id="order-status" name="status" required>
+          {% for value, label in allowed_statuses %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Сохранить статус</button>
+      </form>
+      {% else %}
+      <p>Изменение статуса сейчас недоступно.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

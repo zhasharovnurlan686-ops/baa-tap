@@ -1,0 +1,187 @@
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from accounts.models import User
+from .forms import OrderCreateForm
+from .models import Order, OrderItem, SupplierListing
+
+
+def _can_buy(user):
+    return user.is_staff or (
+        user.role in (User.Role.BUYER, User.Role.BOTH)
+        and user.verification_status == User.VerificationStatus.VERIFIED
+    )
+
+
+@login_required
+def order_create(request, pk):
+    if not _can_buy(request.user):
+        messages.error(
+            request,
+            "??? ?????????? ???????? ?????? ????? ???? ?????????? "
+            "? ?????????????? ????????.",
+        )
+        return redirect("profile_edit")
+
+    form = OrderCreateForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            listing = get_object_or_404(
+                SupplierListing.objects.select_for_update().select_related(
+                    "supplier", "category"
+                ),
+                pk=pk,
+                is_active=True,
+            )
+
+            if listing.supplier_id == request.user.pk:
+                messages.error(request, "?????? ???????? ??????????? ??????????.")
+                return redirect("supplier_listing_detail", pk=listing.pk)
+
+            if listing.price is None or listing.price <= Decimal("0"):
+                messages.error(
+                    request,
+                    "??? ?????? ? ?????????? ?????? ???? ????????????? ????.",
+                )
+                return redirect("supplier_listing_detail", pk=listing.pk)
+
+            quantity = form.cleaned_data["quantity"]
+            unit_price = listing.price
+            line_total = unit_price * quantity
+
+            order = Order.objects.create(
+                buyer=request.user,
+                supplier=listing.supplier,
+                status=Order.Status.NEW,
+                total_amount=line_total,
+                buyer_note=form.cleaned_data["buyer_note"],
+            )
+            OrderItem.objects.create(
+                order=order,
+                listing=listing,
+                title=listing.title,
+                quantity=quantity,
+                unit_price=unit_price,
+                line_total=line_total,
+            )
+
+        messages.success(request, f"????? ?{order.pk} ????????.")
+        return redirect("order_detail", pk=order.pk)
+
+    listing = get_object_or_404(
+        SupplierListing.objects.select_related("supplier", "category"),
+        pk=pk,
+        is_active=True,
+    )
+
+    if listing.supplier_id == request.user.pk:
+        messages.error(request, "?????? ???????? ??????????? ??????????.")
+        return redirect("supplier_listing_detail", pk=listing.pk)
+
+    if listing.price is None or listing.price <= Decimal("0"):
+        messages.info(request, "? ?????????? ???? ??? ????????????? ????.")
+        return redirect("supplier_listing_detail", pk=listing.pk)
+
+    return render(request, "marketplace/order_create.html", {
+        "form": form,
+        "listing": listing,
+    })
+
+
+@login_required
+def order_list(request):
+    orders = Order.objects.select_related("buyer", "supplier")
+    if not request.user.is_staff:
+        orders = orders.filter(
+            Q(buyer=request.user) | Q(supplier=request.user)
+        )
+    return render(request, "marketplace/order_list.html", {"orders": orders})
+
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(
+        Order.objects.select_related("buyer", "supplier").prefetch_related("items"),
+        pk=pk,
+    )
+
+    if not request.user.is_staff and request.user.pk not in (
+        order.buyer_id, order.supplier_id
+    ):
+        raise Http404
+
+    if request.user.is_staff:
+        allowed_statuses = list(Order.Status.choices)
+    elif request.user.pk == order.buyer_id:
+        allowed_statuses = (
+            [(Order.Status.CANCELLED, Order.Status.CANCELLED.label)]
+            if order.status == Order.Status.NEW else []
+        )
+    else:
+        transitions = {
+            Order.Status.NEW: [Order.Status.CONFIRMED, Order.Status.CANCELLED],
+            Order.Status.CONFIRMED: [Order.Status.PROCESSING, Order.Status.CANCELLED],
+            Order.Status.PROCESSING: [Order.Status.SHIPPED, Order.Status.CANCELLED],
+            Order.Status.SHIPPED: [Order.Status.COMPLETED],
+        }
+        allowed_statuses = [
+            (value, Order.Status(value).label)
+            for value in transitions.get(order.status, [])
+        ]
+
+    return render(request, "marketplace/order_detail.html", {
+        "order": order,
+        "allowed_statuses": allowed_statuses,
+    })
+
+
+@login_required
+@require_POST
+def order_update_status(request, pk):
+    with transaction.atomic():
+        order = get_object_or_404(
+            Order.objects.select_for_update(),
+            pk=pk,
+        )
+
+        if not request.user.is_staff and request.user.pk not in (
+            order.buyer_id, order.supplier_id
+        ):
+            raise Http404
+
+        new_status = request.POST.get("status", "")
+        valid_values = {value for value, label in Order.Status.choices}
+
+        if request.user.is_staff:
+            allowed = valid_values
+        elif request.user.pk == order.buyer_id:
+            allowed = (
+                {Order.Status.CANCELLED}
+                if order.status == Order.Status.NEW else set()
+            )
+        else:
+            transitions = {
+                Order.Status.NEW: {Order.Status.CONFIRMED, Order.Status.CANCELLED},
+                Order.Status.CONFIRMED: {Order.Status.PROCESSING, Order.Status.CANCELLED},
+                Order.Status.PROCESSING: {Order.Status.SHIPPED, Order.Status.CANCELLED},
+                Order.Status.SHIPPED: {Order.Status.COMPLETED},
+            }
+            allowed = transitions.get(order.status, set())
+
+        if new_status not in allowed:
+            messages.error(request, "???? ??????? ??????? ??????????.")
+            return redirect("order_detail", pk=order.pk)
+
+        order.status = new_status
+        order.save(update_fields=["status", "updated_at"])
+
+    messages.success(request, "?????? ?????? ????????.")
+    return redirect("order_detail", pk=order.pk)

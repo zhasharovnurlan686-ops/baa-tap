@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Каталог поставщиков — BaaTap KG{% endblock %}
+
+{% block content %}
+<section class="page-hero supplier-hero">
+  <div class="container">
+    <div class="eyebrow">BaaTap KG / Каталог поставщиков</div>
+    <h1>Товары и услуги для вашего бизнеса</h1>
+    <p>Находите надёжных поставщиков, изучайте предложения и сравнивайте цены в одном месте.</p>
+    <div class="supplier-hero-actions">
+      {% if user.is_authenticated %}
+        <a class="btn btn-primary" href="{% url 'supplier_listing_create' %}">＋ Разместить предложение</a>
+      {% else %}
+        <a class="btn btn-primary" href="{% url 'login' %}?next={% url 'supplier_listing_create' %}">＋ Разместить предложение</a>
+      {% endif %}
+      <a class="btn btn-secondary" href="{% url 'request_list' %}">Смотреть заказы покупателей →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section supplier-catalog-section">
+  <div class="container">
+    <form class="filter-bar supplier-filter" method="get">
+      <input type="search" name="q" value="{{ q }}" placeholder="Что вы ищете?">
+      <select name="category">
+        <option value="">Все категории</option>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {% if selected_category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name_ru }}</option>
+        {% endfor %}
+      </select>
+      <input name="city" value="{{ city }}" placeholder="Город">
+      <button class="btn btn-primary" type="submit">Найти предложения</button>
+    </form>
+
+    <div class="supplier-results-heading">
+      <div>
+        <div class="eyebrow">Возможности для бизнеса</div>
+        <h2>Предложения поставщиков</h2>
+      </div>
+    </div>
+
+    <div class="request-grid supplier-grid">
+      {% for item in listings %}
+        <article class="request-card supplier-card">
+          <a class="supplier-card-image" href="{{ item.get_absolute_url }}" aria-label="{{ item.title }}">
+            {% if item.image_url %}
+              <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+            {% else %}
+              <div class="supplier-image-placeholder">
+                <span>BAATAP KG</span>
+                <strong>{{ item.category.name_ru }}</strong>
+              </div>
+            {% endif %}
+          </a>
+
+          <div class="supplier-card-body">
+            <div class="supplier-card-meta">
+              <span class="pill">{{ item.category.name_ru }}</span>
+              <span class="supplier-date">
+                Дата публикации: {{ item.created_at|date:"d.m.Y" }}
+                <br>
+                Не указан
+                {% if item.deadline %}
+                    {{ item.deadline|date:"d.m.Y" }}
+                {% else %}
+                    Не указан
+                {% endif %}
+              </span>
+            </div>
+
+            <h3 class="supplier-card-title">
+              <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+            </h3>
+
+            <p class="supplier-card-description">{{ item.description|truncatechars:150 }}</p>
+
+            <div class="supplier-company">
+              <span class="supplier-company-icon">B2B</span>
+              <div>
+                <span class="supplier-muted-label">Поставщик</span>
+                <strong>{{ item.supplier.company_name|default:item.supplier.get_full_name|default:item.supplier.username }}</strong>
+              </div>
+            </div>
+
+            <div class="supplier-price-panel">
+              <span>Стоимость</span>
+              <strong>
+                {% if item.price != None %}
+                  {{ item.price|floatformat:"-2" }} <small>сом</small>
+                {% else %}
+                  По договорённости
+                {% endif %}
+              </strong>
+            </div>
+
+            <div class="supplier-facts">
+              {% if item.quantity %}
+                <div class="supplier-fact">
+                  <span class="supplier-fact-symbol">▦</span>
+                  <div><span>Количество</span><strong>{{ item.quantity }}</strong></div>
+                </div>
+              {% endif %}
+              <div class="supplier-fact">
+                <span class="supplier-fact-symbol">⌖</span>
+                <div><span>Город</span><strong>{{ item.city|default:"Кыргызстан" }}</strong></div>
+              </div>
+            </div>
+
+            <a class="btn btn-primary btn-block supplier-details-button" href="{{ item.get_absolute_url }}">
+              Подробнее о предложении <span>→</span>
+            </a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state supplier-empty">
+          <h3>Пока нет предложений</h3>
+          <p>Попробуйте изменить параметры поиска или вернитесь позже.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

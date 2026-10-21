@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Заказ №{{ order.pk }} — BaaTap KG
+{% if order.business_request %}
+<section class="dashboard-panel" style="margin-top:20px">
+  <h3>Исходная заявка</h3>
+  <p>
+    Заказ оформлен по заявке
+    <strong>№{{ order.business_request.pk }}</strong>:
+    {{ order.business_request.title }}
+  </p>
+  <a class="btn btn-primary"
+     href="{% url 'request_detail' order.business_request.pk %}">
+     Открыть заявку
+  </a>
+  {% if order.offer %}
+  <p style="margin-top:12px">
+    Коммерческое предложение №{{ order.offer.pk }} ·
+    {{ order.offer.price|floatformat:2 }} сом
+  </p>
+  {% endif %}
+</section>
+{% endif %}
+
+
+<section id="baatap-deal-history" class="dashboard-panel" style="margin-top:24px">
+  <h3>История сделки</h3>
+
+  <div class="dashboard-row">
+    <span>Заказ</span>
+    <strong>№{{ order.pk }}</strong>
+  </div>
+
+  {% if order.business_request %}
+  <div class="dashboard-row">
+    <span>Исходная заявка</span>
+    <span>
+      №{{ order.business_request.pk }} — {{ order.business_request.title }}
+      <a href="{% url 'request_detail' order.business_request.pk %}">Открыть заявку</a>
+    </span>
+  </div>
+
+  <p>
+    <a href="{% url 'request_offers' order.business_request.pk %}">
+      Посмотреть предложения по заявке
+    </a>
+  </p>
+  {% endif %}
+
+  {% if order.offer %}
+  <div class="dashboard-row">
+    <span>Коммерческое предложение</span>
+    <span>
+      №{{ order.offer.pk }} · {{ order.offer.price|floatformat:2 }} сом
+    </span>
+  </div>
+  <p>Статус предложения: {{ order.offer.get_status_display|default:order.offer.status }}</p>
+  <p>Условия: {{ order.offer.details|default:"Не указаны" }}</p>
+  {% else %}
+  <p>Этот заказ оформлен не из коммерческого предложения.</p>
+  {% endif %}
+
+  <p>
+    <a href="{% url 'notification_list' %}">Перейти к уведомлениям</a>
+  </p>
+</section>
+
+{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <a href="{% url 'order_list' %}">← Все заказы</a>
+    <h1>Заказ №{{ order.pk }}</h1>
+    <div class="dashboard-panel">
+      <p><strong>Статус:</strong> {{ order.get_status_display }}</p>
+      <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+      <p><strong>Покупатель:</strong> {{ order.buyer.company_name|default:order.buyer.username }}</p>
+      <p><strong>Поставщик:</strong> {{ order.supplier.company_name|default:order.supplier.username }}</p>
+      <h2>Состав заказа</h2>
+      {% for item in order.items.all %}
+      <div class="dashboard-row">
+        <span class="dashboard-row-main">
+          <b>{{ item.title }}</b>
+          <small>{{ item.quantity }} шт. × {{ item.unit_price|floatformat:2 }} сом</small>
+        </span>
+        <span class="row-end">{{ item.line_total|floatformat:2 }} сом</span>
+      </div>
+      {% empty %}
+      <p>В заказе пока нет товаров.</p>
+      {% endfor %}
+      <h2>Итого: {{ order.total_amount|floatformat:2 }} сом</h2>
+      {% if order.buyer_note %}
+      <p><strong>Комментарий покупателя:</strong> {{ order.buyer_note|linebreaksbr }}</p>
+      {% endif %}
+      {% if allowed_statuses %}
+      <form method="post" action="{% url 'order_update_status' order.pk %}">
+        {% csrf_token %}
+        <label for="order-status">Изменить статус заказа</label>
+        <select id="order-status" name="status" required>
+          {% for value, label in allowed_statuses %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Сохранить статус</button>
+      </form>
+      {% else %}
+      <p>Изменение статуса сейчас недоступно.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

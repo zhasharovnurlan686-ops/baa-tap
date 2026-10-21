@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}????? ?{{ order.pk }} ? BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <a href="{% url 'order_list' %}">? ??? ??????</a>
+    <h1>????? ?{{ order.pk }}</h1>
+    <div class="dashboard-panel">
+      <p><strong>??????:</strong> {{ order.get_status_display }}</p>
+      <p><strong>????:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+      <p><strong>??????????:</strong> {{ order.buyer.company_name|default:order.buyer.username }}</p>
+      <p><strong>?????????:</strong> {{ order.supplier.company_name|default:order.supplier.username }}</p>
+
+      <h2>?????? ??????</h2>
+      {% for item in order.items.all %}
+        <div class="dashboard-row">
+          <span class="dashboard-row-main">
+            <b>{{ item.title }}</b>
+            <small>{{ item.quantity }} ? {{ item.unit_price|floatformat:2 }} ???</small>
+          </span>
+          <span class="row-end">{{ item.line_total|floatformat:2 }} ???</span>
+        </div>
+      {% endfor %}
+      <h2>?????: {{ order.total_amount|floatformat:2 }} ???</h2>
+
+      {% if order.buyer_note %}
+        <p><strong>???????????:</strong> {{ order.buyer_note|linebreaksbr }}</p>
+      {% endif %}
+
+      {% if allowed_statuses %}
+        <form method="post" action="{% url 'order_update_status' order.pk %}">
+          {% csrf_token %}
+          <label for="order-status">???????? ??????</label>
+          <select id="order-status" name="status" required>
+            {% for value, label in allowed_statuses %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary" type="submit">???????? ??????</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

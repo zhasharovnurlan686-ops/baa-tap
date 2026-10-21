@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Оформление заказа — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1>Оформление оптового заказа</h1>
+    <div class="dashboard-panel">
+      <h2>{{ listing.title }}</h2>
+      <p>Поставщик: {{ listing.supplier.company_name|default:listing.supplier.username }}</p>
+      <p>Цена за единицу: <strong>{{ listing.price|floatformat:2 }} сом</strong></p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary" type="submit">Подтвердить заказ</button>
+        <a class="btn btn-secondary" href="{% url 'supplier_listing_detail' listing.pk %}">Назад к товару</a>
+      </form>
+      <p>После оформления заказ появится в разделе «Оптовые заказы».</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

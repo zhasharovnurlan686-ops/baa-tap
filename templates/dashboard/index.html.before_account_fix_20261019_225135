@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}??? ??????? ? BaaTap KG{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">BaaTap KG / ???????</div>
+    <h1>????????????, {{ user.first_name|default:user.username }}!</h1>
+    <p>?????????? ????????????? ????????? ? ????????????? ? ????? ?????.</p>
+    <div class="hero-actions">
+      {% if user.role == "buyer" or user.role == "both" or user.is_staff %}
+        <a class="btn btn-primary" href="{% url 'request_create' %}">+ ??????? ??????</a>
+      {% endif %}
+      <a class="btn btn-secondary" href="{% url 'profile_edit' %}">????????? ???????</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container dashboard-grid">
+    <div class="dashboard-panel">
+      <div class="panel-heading">
+        <h2>??? ???????</h2>
+        <span class="count-badge">{{ my_requests|length }}</span>
+      </div>
+
+      {% for item in my_requests %}
+        <a class="dashboard-row" href="{{ item.get_absolute_url }}">
+          <span class="dashboard-row-main">
+            <b>{{ item.title }}</b>
+            <small>{{ item.category.name_ru }} ? {{ item.created_at|date:'d.m.Y' }}</small>
+          </span>
+          <span class="row-end">
+            <small>{{ item.offers.count }} ?????.</small>
+            <span aria-hidden="true">?</span>
+          </span>
+        </a>
+      {% empty %}
+        <div class="empty-inline">
+          ?? ??? ?? ????????? ???????.
+          <a href="{% url 'request_create' %}">??????? ??????</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="dashboard-panel">
+      <div class="panel-heading">
+        <h2>??? ???????????</h2>
+        <span class="count-badge">{{ my_offers|length }}</span>
+      </div>
+
+      {% for offer in my_offers %}
+        <a class="dashboard-row" href="{{ offer.request.get_absolute_url }}">
+          <span class="dashboard-row-main">
+            <b>{{ offer.request.title }}</b>
+            <small>{{ offer.price|floatformat:2 }} ??? ? {{ offer.created_at|date:'d.m.Y' }}</small>
+          </span>
+          <span class="row-end"><span aria-hidden="true">?</span></span>
+        </a>
+      {% empty %}
+        <div class="empty-inline">
+          ?? ??? ?? ?????????? ???????????.
+          <a href="{% url 'request_list' %}">????? ???????</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,1 +1,51 @@
-{% extends 'base.html' %}{% block title %}{{ item.title }} — BaaTap KG{% endblock %}{% block content %}<section class="section"><div class="container detail-layout"><div class="detail-main"><a class="back-link" href="{% url 'request_list' %}">← Все запросы</a><div class="detail-card"><div class="request-meta"><span class="pill">{{ item.category.name_ru }}</span><span class="status-pill">{% if item.status == 'open' %}Открыт{% elif item.status == 'paused' %}Приостановлен{% else %}Закрыт{% endif %}</span></div><h1>{{ item.title }}</h1><p class="detail-description">{{ item.description|linebreaksbr }}</p><div class="detail-facts"><div><small>Количество</small><b>{{ item.quantity|default:'Не указано' }}</b></div><div><small>Бюджет</small><b>{% if item.budget_min or item.budget_max %}{{ item.budget_min|default:'—' }} – {{ item.budget_max|default:'—' }} сом{% else %}По предложению{% endif %}</b></div><div><small>Город</small><b>{{ item.city|default:'Кыргызстан' }}</b></div><div><small>Желаемый срок</small><b>{{ item.deadline|date:'d.m.Y'|default:'Не указан' }}</b></div></div><div class="request-author"><span class="fake-avatar">{{ item.buyer.company_name|default:item.buyer.username|slice:':1'|upper }}</span><span><b>{{ item.buyer.company_name|default:item.buyer.get_full_name|default:item.buyer.username }}</b><small>Опубликовано {{ item.created_at|date:'d.m.Y H:i' }}</small></span></div>{% if user == item.buyer %}<a class="btn btn-secondary" href="{% url 'request_edit' item.pk %}">Редактировать запрос</a>{% endif %}</div>{% if can_view_offers %}<div class="offers-section"><h2>Предложения поставщиков ({{ offer_count }})</h2>{% for offer in offers %}<div class="offer-card"><div class="offer-head"><div><b>{{ offer.supplier.company_name|default:offer.supplier.username }}</b><small>{{ offer.supplier.city }}</small></div><strong>{{ offer.price|floatformat:2 }} сом</strong></div><p>{{ offer.details|default:'Без дополнительного комментария.' }}</p><div class="request-card-bottom"><span>Срок: {{ offer.delivery_days }} дн.</span><a href="{% url 'supplier_detail' offer.supplier.username %}">Профиль поставщика →</a></div></div>{% empty %}<p class="muted">Пока никто не отправил предложение.</p>{% endfor %}</div>{% endif %}</div><aside class="detail-sidebar"><div class="sidebar-card"><h3>{% if user == item.buyer %}Ваша заявка{% else %}Есть подходящее предложение?{% endif %}</h3><p>{% if user == item.buyer %}Поделитесь ссылкой на запрос с поставщиками, чтобы получить больше ответов.{% else %}Отправьте цену и срок выполнения. Покупатель увидит ваше предложение в личном кабинете.{% endif %}</p>{% if user.is_authenticated and user != item.buyer and item.status == 'open' %}<a class="btn btn-primary btn-block" href="{% url 'offer_create' item.pk %}">{% if my_offer %}Изменить предложение{% else %}Отправить предложение{% endif %} →</a>{% elif not user.is_authenticated %}<a class="btn btn-primary btn-block" href="{% url 'login' %}?next={{ request.path }}">Войдите, чтобы ответить</a><a class="text-link centered" href="{% url 'register' %}">Создать аккаунт</a>{% endif %}<div class="sidebar-divider"></div><div class="privacy-note">ⓘ Контакты и условия стороны согласуют напрямую. BaaTap KG не проводит государственные закупки.</div></div></aside></div></section>{% endblock %}
+{% extends 'base.html' %}{% block title %}{{ item.title }} — BaaTap KG
+<div class="dashboard-panel" style="margin-top:20px">
+  <h3>Коммерческие предложения</h3>
+  <p>Сравните цены, сроки поставки и условия поставщиков по этой заявке.</p>
+  <a class="btn btn-primary"
+     href="{% url 'request_offers' item.pk %}">
+     Посмотреть предложения
+  </a>
+</div>
+
+
+{% if item %}
+<div class="dashboard-panel" style="margin-top:20px">
+  <h3>Коммерческие предложения</h3>
+  <a class="btn btn-primary" href="{% url 'request_offers' item.pk %}">Посмотреть предложения</a>
+</div>
+{% elif business_request %}
+<div class="dashboard-panel" style="margin-top:20px">
+  <h3>Коммерческие предложения</h3>
+  <a class="btn btn-primary" href="{% url 'request_offers' item.pk %}">Посмотреть предложения</a>
+</div>
+{% endif %}
+
+{% endblock %}{% block content %}<section class="section"><div class="container detail-layout"><div class="detail-main"><a class="back-link" href="{% url 'request_list' %}">← Все запросы</a><div class="detail-card"><div class="request-meta"><span class="pill">{{ item.category.name_ru }}</span><span class="status-pill">{% if item.status == 'open' %}Открыт{% elif item.status == 'paused' %}Приостановлен{% else %}Закрыт{% endif %}</span></div><h1>{{ item.title }}</h1><p class="detail-description">{{ item.description|linebreaksbr }}</p><div class="detail-facts"><div><small>Количество</small><b>{{ item.quantity|default:'Не указано' }}</b></div><div><small>Бюджет</small><b>{% if item.budget_min or item.budget_max %}{{ item.budget_min|default:'—' }} – {{ item.budget_max|default:'—' }} сом{% else %}По предложению{% endif %}</b></div><div><small>Город</small><b>{{ item.city|default:'Кыргызстан' }}</b></div><div><small>Желаемый срок</small><b>{{ item.deadline|date:'d.m.Y'|default:'Не указан' }}</b></div></div><div class="request-author">
+<span class="fake-avatar">{{ item.buyer.company_name|default:item.buyer.get_full_name|default:item.buyer.username|slice:':1'|upper }}</span>
+<span>
+<b>{% if item.buyer.is_supplier %}Поставщик{% else %}Покупатель{% endif %}</b>
+<strong>{{ item.buyer.company_name|default:item.buyer.get_full_name|default:item.buyer.username }}</strong>
+<small>{{ item.buyer.city|default:"Бишкек" }}</small>
+</span>
+</div>
+
+{% if item.buyer.phone %}
+<a class="buyer-whatsapp-button"
+href="https://wa.me/{% with phone=item.buyer.phone|cut:' '|cut:'+'|cut:'('|cut:')'|cut:'-'|cut:'.' %}{% if phone|slice:':1' == '0' %}996{{ phone|slice:'1:' }}{% else %}{{ phone }}{% endif %}{% endwith %}?text={{ item.title|urlencode }}"
+target="_blank" rel="noopener noreferrer"
+style="display:inline-flex;background:#25D366;color:white;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:bold;margin:12px 8px 12px 0;">
+Перейти в WhatsApp
+</a>
+{% else %}
+<a class="buyer-whatsapp-button" href="#"
+onclick="alert('\u0417\u0430\u043a\u0430\u0437\u0447\u0438\u043a \u043d\u0435 \u0443\u043a\u0430\u0437\u0430\u043b \u043d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430.');return false;"
+style="display:inline-flex;background:#25D366;color:white;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:bold;margin:12px 8px 12px 0;">
+Перейти в WhatsApp
+</a>
+{% endif %}
+
+{% if user == item.buyer %}<a class="btn btn-secondary" href="{% url 'request_edit' item.pk %}">Редактировать запрос</a>{% endif %}</div>{% if can_view_offers %}<div class="offers-section"><h2>Предложения поставщиков ({{ offer_count }})</h2>{% for offer in offers %}<div class="offer-card"><div class="offer-head"><div><b>{{ offer.supplier.company_name|default:offer.supplier.username }}</b><small>{{ offer.supplier.city }}</small></div><strong>{{ offer.price|floatformat:2 }} сом</strong></div><p>{{ offer.details|default:'Без дополнительного комментария.' }}</p><div class="request-card-bottom"><span>Срок: {{ offer.delivery_days }} дн.</span><a href="{% url 'supplier_detail' offer.supplier.username %}">Профиль поставщика →</a></div></div>{% empty %}<p class="muted">Пока никто не отправил предложение.</p>{% endfor %}</div>{% endif %}</div><aside class="detail-sidebar"><div class="sidebar-card"><h3>{% if user == item.buyer %}Ваша заявка{% else %}Есть подходящее предложение?{% endif %}</h3><p>{% if user == item.buyer %}Поделитесь ссылкой на запрос с поставщиками, чтобы получить больше ответов.{% else %}Отправьте цену и срок выполнения. Покупатель увидит ваше предложение в личном кабинете.{% endif %}</p>{% if user.is_authenticated and user != item.buyer and item.status == 'open' %}<a class="btn btn-primary btn-block" href="{% url 'offer_create' item.pk %}">{% if my_offer %}Изменить предложение{% else %}Отправить предложение{% endif %} →</a>{% elif not user.is_authenticated %}<a class="btn btn-primary btn-block" href="{% url 'login' %}?next={{ request.path }}">Войдите, чтобы ответить</a><a class="text-link centered" href="{% url 'register' %}">Создать аккаунт</a>{% endif %}
+{% if item.buyer.phone %}
+{% endif %}
+<div class="sidebar-divider"></div><div class="privacy-note">ⓘ Контакты и условия стороны согласуют напрямую. BaaTap KG не проводит государственные закупки.</div></div></aside></div></section>{% endblock %}

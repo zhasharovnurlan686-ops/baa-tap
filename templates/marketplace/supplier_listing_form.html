@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container form-page">
+    <div class="form-card">
+      <div class="eyebrow">BaaTap KG / Поставщикам</div>
+      <h1>{{ page_title }}</h1>
+      <p class="form-intro">Расскажите о товаре или услуге, укажите цену и количество.</p>
+      <form method="post" class="styled-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="form-field">
+            {% if field.name == "privacy_consent" %}
+              <label for="{{ field.id_for_label }}">
+                {{ field }} {{ field.label }}
+                <a href="{% url 'privacy' %}" target="_blank" rel="noopener">Политика конфиденциальности</a>
+              </label>
+            {% else %}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            {% endif %}
+            {% for error in field.errors %}<small class="error-text">{{ error }}</small>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="btn btn-primary btn-block" type="submit">Опубликовать предложение →</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

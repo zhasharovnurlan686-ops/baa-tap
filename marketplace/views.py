@@ -6,8 +6,8 @@ from django.db.models import Q, Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
-from .models import Category, BusinessRequest, Offer
-from .forms import RequestForm, OfferForm
+from .models import Category, BusinessRequest, Offer, SupplierListing
+from .forms import RequestForm, OfferForm, SupplierListingForm
 
 
 def submission_rate_limited(request, action, limit=5, period=600):
@@ -25,11 +25,48 @@ def submission_rate_limited(request, action, limit=5, period=600):
     return False
 
 
+
+def role_required_for_catalog(request, allowed_roles, redirect_name, role_label):
+    """Проверяет доступ пользователя к разделу каталога."""
+    if not request.user.is_authenticated:
+        messages.info(
+            request,
+            "Войдите в аккаунт, чтобы просматривать этот раздел.",
+        )
+        return redirect("login")
+
+    if request.user.is_staff or request.user.role in ("both", *allowed_roles):
+        return None
+
+    messages.error(
+        request,
+        f"Этот раздел доступен для следующих ролей: {role_label}. "
+        "Изменить роль можно в профиле.",
+    )
+    return redirect(redirect_name)
+
+
+def can_view_b2b_details(request):
+    """Определяет, может ли пользователь видеть оптовые цены и объёмы."""
+    if not request.user.is_authenticated:
+        return False
+
+    return (
+        request.user.is_staff
+        or request.user.verification_status == "verified"
+    )
+
+
 def home(request):
     recent = (
         BusinessRequest.objects
         .filter(status=BusinessRequest.Status.OPEN)
         .select_related("category", "buyer")[:6]
+    )
+    supplier_listings = (
+        SupplierListing.objects
+        .filter(is_active=True)
+        .select_related("category", "supplier")[:6]
     )
     categories = Category.objects.filter(is_active=True).annotate(
         request_count=Count(
@@ -43,12 +80,20 @@ def home(request):
 
     return render(request, "marketplace/home.html", {
         "recent_requests": recent,
+        "supplier_listings": supplier_listings,
+        "can_view_b2b_details": can_view_b2b_details(request),
         "categories": categories,
         "open_count": open_count,
     })
 
 
 def request_list(request):
+    denied = role_required_for_catalog(
+        request, ("buyer", "supplier"), "supplier_listing_list", "покупателям и поставщикам"
+    )
+    if denied:
+        return denied
+
     qs = (
         BusinessRequest.objects
         .filter(status=BusinessRequest.Status.OPEN)
@@ -230,10 +275,17 @@ def dashboard(request):
         .filter(supplier=request.user)
         .select_related("request", "request__category")
     )
+    my_listings = (
+        SupplierListing.objects
+        .filter(supplier=request.user)
+        .select_related("category")
+        .order_by("-created_at")
+    )
 
     return render(request, "dashboard/index.html", {
         "my_requests": my_requests,
         "my_offers": my_offers,
+        "my_listings": my_listings,
     })
 
 
@@ -251,3 +303,97 @@ def supplier_detail(request, username):
         "supplier": supplier,
         "offer_count": supplier.offers.count(),
     })
+
+
+def supplier_listing_list(request):
+    listings = (
+        SupplierListing.objects
+        .filter(is_active=True)
+        .select_related("category", "supplier")
+        .order_by("-created_at")
+    )
+
+    query = request.GET.get("q", "").strip()
+    city = request.GET.get("city", "").strip()
+    category = request.GET.get("category", "")
+
+    if query:
+        listings = listings.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(category__name_ru__icontains=query)
+            | Q(category__name_ky__icontains=query)
+        )
+
+    if city:
+        listings = listings.filter(city__icontains=city)
+
+    if category.isdigit():
+        listings = listings.filter(category_id=int(category))
+
+    return render(request, "marketplace/supplier_listing_list.html", {
+        "listings": listings,
+        "categories": Category.objects.filter(is_active=True),
+        "q": query,
+        "city": city,
+        "selected_category": category,
+        "can_view_b2b_details": can_view_b2b_details(request),
+    })
+
+
+@login_required
+def supplier_listing_create(request):
+    if (
+        request.user.role not in ("supplier", "both")
+        and not request.user.is_staff
+    ):
+        messages.error(
+            request,
+            "Для публикации выберите роль поставщика "
+            "или обе роли в профиле.",
+        )
+        return redirect("profile_edit")
+
+    if submission_rate_limited(request, "supplier-listing"):
+        return HttpResponse(
+            "Слишком много отправок. Попробуйте через 10 минут.",
+            status=429,
+        )
+
+    form = SupplierListingForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        listing = form.save(commit=False)
+        listing.supplier = request.user
+        listing.city = listing.city or request.user.city
+        listing.save()
+        messages.success(request, "Предложение поставщика опубликовано.")
+        return redirect(listing.get_absolute_url())
+
+    return render(request, "marketplace/supplier_listing_form.html", {
+        "form": form,
+        "page_title": "Разместить предложение",
+    })
+
+
+def supplier_listing_detail(request, pk):
+    listing = get_object_or_404(
+        SupplierListing.objects.select_related("category", "supplier"),
+        pk=pk,
+    )
+
+    if not listing.is_active and (
+        not request.user.is_authenticated
+        or (
+            request.user != listing.supplier
+            and not request.user.is_staff
+        )
+    ):
+        from django.http import Http404
+        raise Http404
+
+    return render(
+        request,
+        "marketplace/supplier_listing_detail.html",
+{"listing": listing, "can_view_b2b_details": can_view_b2b_details(request)},
+    )

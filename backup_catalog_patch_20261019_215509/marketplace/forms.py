@@ -1,0 +1,71 @@
+from django import forms
+from .models import BusinessRequest, Offer
+
+
+class PrivacyConsentMixin:
+    privacy_consent = forms.BooleanField(
+        required=True,
+        label="Я согласен(на) на обработку персональных данных и принимаю политику конфиденциальности.",
+        error_messages={
+            "required": "Для продолжения необходимо дать согласие на обработку персональных данных."
+        },
+    )
+
+
+class RequestForm(forms.ModelForm):
+    privacy_consent = forms.BooleanField(
+        required=True,
+        label=PrivacyConsentMixin.privacy_consent.label,
+        error_messages=PrivacyConsentMixin.privacy_consent.error_messages,
+    )
+    class Meta:
+        model = BusinessRequest
+        fields = (
+            "category", "title", "description", "quantity",
+            "budget_min", "budget_max", "city", "deadline",
+        )
+        labels = {
+            "category": "Категория",
+            "title": "Что вам нужно?",
+            "description": "Описание и требования",
+            "quantity": "Количество",
+            "budget_min": "Бюджет от, сом",
+            "budget_max": "Бюджет до, сом",
+            "city": "Город",
+            "deadline": "Желаемый срок",
+        }
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 5, "maxlength": 5000}),
+            "deadline": forms.DateInput(attrs={"type": "date"}),
+            "title": forms.TextInput(attrs={"maxlength": 200}),
+            "city": forms.TextInput(attrs={"maxlength": 100}),
+        }
+
+    def clean(self):
+        data = super().clean()
+        low, high = data.get("budget_min"), data.get("budget_max")
+        if low is not None and high is not None and low > high:
+            self.add_error(
+                "budget_max",
+                "Максимальный бюджет не может быть меньше минимального.",
+            )
+        return data
+
+
+class OfferForm(forms.ModelForm):
+    privacy_consent = forms.BooleanField(
+        required=True,
+        label=PrivacyConsentMixin.privacy_consent.label,
+        error_messages=PrivacyConsentMixin.privacy_consent.error_messages,
+    )
+    class Meta:
+        model = Offer
+        fields = ("price", "delivery_days", "details")
+        labels = {
+            "price": "Цена, сом",
+            "delivery_days": "Срок выполнения, дней",
+            "details": "Условия и комментарий",
+        }
+        widgets = {
+            "details": forms.Textarea(attrs={"rows": 3, "maxlength": 3000}),
+        }

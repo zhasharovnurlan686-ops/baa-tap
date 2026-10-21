@@ -1,0 +1,149 @@
+/* BaaTap KG: dashboard layout fixes */
+.dashboard-panel {
+    min-width: 0;
+}
+
+.dashboard-panel .panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dashboard-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dashboard-row-main {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dashboard-row-main b {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-row-main small {
+    display: block;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+.dashboard-row .row-end {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.count-badge {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+    .dashboard-row {
+        gap: 10px;
+    }
+
+    .dashboard-row .row-end {
+        gap: 5px;
+    }
+
+    .dashboard-row-main small {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Supplier catalog styles: begin */
+.supplier-catalog-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.supplier-catalog-card h3 {
+    margin: 12px 0 8px;
+    overflow-wrap: anywhere;
+}
+
+.supplier-catalog-description {
+    line-height: 1.65;
+}
+
+.supplier-catalog-image {
+    display: block;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.supplier-catalog-price {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 12px 0;
+    padding: 16px;
+    background: #f3f7fc;
+    border: 1px solid #e5eaf0;
+    border-radius: 12px;
+}
+
+.supplier-catalog-price span,
+.supplier-catalog-facts span {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.supplier-catalog-price strong {
+    color: #12345a;
+    font-size: 21px;
+    overflow-wrap: anywhere;
+}
+
+.supplier-catalog-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #e5eaf0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.supplier-catalog-facts strong {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.supplier-catalog-owner {
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+.supplier-catalog-button {
+    margin-top: 12px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .supplier-catalog-facts {
+        grid-template-columns: 1fr;
+    }
+}
+/* Supplier catalog styles: end */
+

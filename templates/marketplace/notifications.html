@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Уведомления — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1>Уведомления</h1>
+    <p>Непрочитанных: {{ unread_count }}</p>
+    <div class="dashboard-panel">
+      {% for notification in notifications %}
+      <div class="dashboard-row">
+        <div>
+          <p><strong>{{ notification.message }}</strong></p>
+          <small>{{ notification.created_at|date:"d.m.Y H:i" }}</small>
+          {% if not notification.is_read %}
+          <span> · Новое</span>
+          {% endif %}
+        </div>
+        {% if notification.order_id %}
+        <form method="post" action="{% url 'notification_read' notification.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit">Открыть заказ</button>
+        </form>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p>Пока уведомлений нет. Здесь появятся сообщения о заказах и изменении их статусов.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

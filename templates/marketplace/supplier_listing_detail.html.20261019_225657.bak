@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container form-page">
+    <div class="form-card">
+      <div class="eyebrow">{{ listing.category.name_ru }}</div>
+      <h1>{{ listing.title }}</h1>
+      {% if listing.image_url %}
+        <img src="{{ listing.image_url }}" alt="{{ listing.title }}" style="width:100%;max-height:420px;object-fit:contain;border-radius:12px">
+      {% endif %}
+      <p>{{ listing.description|linebreaksbr }}</p>
+      <p><strong>Поставщик:</strong>
+        {{ listing.supplier.company_name|default:listing.supplier.get_full_name|default:listing.supplier.username }}
+      </p>
+      <p><strong>Цена:</strong>
+        {% if listing.price != None %}{{ listing.price|floatformat:"-2" }} сом{% else %}По договорённости{% endif %}
+      </p>
+      {% if listing.quantity %}<p><strong>Количество:</strong> {{ listing.quantity }}</p>{% endif %}
+      <p><strong>Город:</strong> {{ listing.city|default:listing.supplier.city|default:"Кыргызстан" }}</p>
+      {% if listing.supplier.phone %}
+        <a class="btn btn-primary" target="_blank" rel="noopener"
+           href="https://wa.me/{{ listing.supplier.phone|cut:' '|cut:'+'|cut:'-'|cut:'('|cut:')' }}">
+          Связаться с поставщиком в WhatsApp
+        </a>
+      {% else %}
+        <p>Контактный телефон поставщика пока не указан.</p>
+      {% endif %}
+      <p><a href="{% url 'supplier_listing_list' %}">← Вернуться к каталогу</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

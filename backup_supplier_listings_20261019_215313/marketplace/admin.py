@@ -1,0 +1,21 @@
+from django.contrib import admin
+from .models import Category, BusinessRequest, Offer
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name_ru", "name_ky", "slug", "is_active")
+    prepopulated_fields = {"slug": ("name_ru",)}
+    list_filter = ("is_active",)
+
+@admin.register(BusinessRequest)
+class RequestAdmin(admin.ModelAdmin):
+    list_display = ("title", "buyer", "category", "city", "status", "created_at")
+    list_filter = ("status", "category", "city")
+    search_fields = ("title", "description", "buyer__username", "buyer__company_name")
+    readonly_fields = ("created_at", "updated_at")
+
+@admin.register(Offer)
+class OfferAdmin(admin.ModelAdmin):
+    list_display = ("request", "supplier", "price", "delivery_days", "created_at")
+    search_fields = ("request__title", "supplier__username", "supplier__company_name")
+    readonly_fields = ("created_at", "updated_at")

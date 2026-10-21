@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}&#1051;&#1080;&#1095;&#1085;&#1099;&#1081; &#1082;&#1072;&#1073;&#1080;&#1085;&#1077;&#1090; ? BaaTap KG{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">BaaTap KG / &#1051;&#1080;&#1095;&#1085;&#1099;&#1081; &#1082;&#1072;&#1073;&#1080;&#1085;&#1077;&#1090;</div>
+    <h1>&#1044;&#1086;&#1073;&#1088;&#1086; &#1087;&#1086;&#1078;&#1072;&#1083;&#1086;&#1074;&#1072;&#1090;&#1100;, {{ user.first_name|default:user.username }}!</h1>
+    <p>&#1059;&#1087;&#1088;&#1072;&#1074;&#1083;&#1103;&#1081;&#1090;&#1077; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;&#1072;&#1084;&#1080; &#1080; &#1087;&#1088;&#1077;&#1076;&#1083;&#1086;&#1078;&#1077;&#1085;&#1080;&#1103;&#1084;&#1080; &#1074; &#1086;&#1076;&#1085;&#1086;&#1084; &#1084;&#1077;&#1089;&#1090;&#1077;.</p>
+    <div class="hero-actions">
+      {% if user.role == "buyer" or user.role == "both" or user.is_staff %}
+        <a class="btn btn-primary" href="{% url 'request_create' %}">+ &#1057;&#1086;&#1079;&#1076;&#1072;&#1090;&#1100; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;</a>
+        <a class="btn btn-secondary" href="{% url 'supplier_listing_list' %}">&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075; &#1087;&#1086;&#1089;&#1090;&#1072;&#1074;&#1097;&#1080;&#1082;&#1086;&#1074;</a>
+      {% endif %}
+      {% if user.role == "supplier" or user.role == "both" or user.is_staff %}
+        <a class="btn btn-secondary" href="{% url 'request_list' %}">&#1053;&#1072;&#1081;&#1090;&#1080; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;&#1099;</a>
+        <a class="btn btn-primary" href="{% url 'supplier_listing_create' %}">+ &#1056;&#1072;&#1079;&#1084;&#1077;&#1089;&#1090;&#1080;&#1090;&#1100; &#1086;&#1073;&#1098;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077;</a>
+      {% endif %}
+      <a class="btn btn-secondary" href="{% url 'profile_edit' %}">&#1052;&#1086;&#1081; &#1087;&#1088;&#1086;&#1092;&#1080;&#1083;&#1100;</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container dashboard-grid">
+
+    {% if user.role == "buyer" or user.role == "both" or user.is_staff %}
+    <div class="dashboard-panel">
+      <div class="panel-heading">
+        <h2>&#1052;&#1086;&#1080; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;&#1099;</h2>
+        <span class="count-badge">{{ my_requests|length }}</span>
+      </div>
+      {% for item in my_requests %}
+        <a class="dashboard-row" href="{{ item.get_absolute_url }}">
+          <span class="dashboard-row-main">
+            <b>{{ item.title }}</b>
+            <small>{{ item.category.name_ru }} &middot; {{ item.created_at|date:'d.m.Y' }}</small>
+          </span>
+          <span class="row-end"><small>{{ item.offers.count }} &#1087;&#1088;&#1077;&#1076;&#1083;.</small> &rarr;</span>
+        </a>
+      {% empty %}
+        <div class="empty-inline">
+          &#1042;&#1099; &#1087;&#1086;&#1082;&#1072; &#1085;&#1077; &#1089;&#1086;&#1079;&#1076;&#1072;&#1074;&#1072;&#1083;&#1080; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;&#1099;.
+          <a href="{% url 'request_create' %}">&#1057;&#1086;&#1079;&#1076;&#1072;&#1090;&#1100; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;</a>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user.role == "supplier" or user.role == "both" or user.is_staff %}
+    <div class="dashboard-panel">
+      <div class="panel-heading">
+        <h2>&#1052;&#1086;&#1080; &#1086;&#1090;&#1074;&#1077;&#1090;&#1099; &#1085;&#1072; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;&#1099;</h2>
+        <span class="count-badge">{{ my_offers|length }}</span>
+      </div>
+      {% for offer in my_offers %}
+        <a class="dashboard-row" href="{{ offer.request.get_absolute_url }}">
+          <span class="dashboard-row-main">
+            <b>{{ offer.request.title }}</b>
+            <small>{{ offer.price|floatformat:2 }} &#1089;&#1086;&#1084; &middot; {{ offer.created_at|date:'d.m.Y' }}</small>
+          </span>
+          <span class="row-end">&rarr;</span>
+        </a>
+      {% empty %}
+        <div class="empty-inline">
+          &#1042;&#1099; &#1087;&#1086;&#1082;&#1072; &#1085;&#1077; &#1086;&#1090;&#1087;&#1088;&#1072;&#1074;&#1083;&#1103;&#1083;&#1080; &#1086;&#1090;&#1074;&#1077;&#1090;&#1086;&#1074;.
+          <a href="{% url 'request_list' %}">&#1053;&#1072;&#1081;&#1090;&#1080; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089;&#1099;</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="dashboard-panel">
+      <div class="panel-heading">
+        <h2>&#1052;&#1086;&#1080; &#1086;&#1073;&#1098;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1103; &#1087;&#1086;&#1089;&#1090;&#1072;&#1074;&#1097;&#1080;&#1082;&#1072;</h2>
+        <span class="count-badge">{{ my_listings|length }}</span>
+      </div>
+      {% for listing in my_listings %}
+        <a class="dashboard-row" href="{% url 'supplier_listing_detail' listing.pk %}">
+          <span class="dashboard-row-main">
+            <b>{{ listing.title }}</b>
+            <small>
+              &#1044;&#1072;&#1090;&#1072; &#1087;&#1091;&#1073;&#1083;&#1080;&#1082;&#1072;&#1094;&#1080;&#1080;: <strong>{{ listing.created_at|date:'d.m.Y' }}</strong>
+              {% if listing.deadline %}
+                <br>&#1057;&#1088;&#1086;&#1082; &#1087;&#1086;&#1076;&#1072;&#1095;&#1080; &#1087;&#1088;&#1077;&#1076;&#1083;&#1086;&#1078;&#1077;&#1085;&#1080;&#1081;: <strong>{{ listing.deadline|date:'d.m.Y' }}</strong>
+              {% endif %}
+              <br>{{ listing.category.name_ru }}
+            </small>
+          </span>
+          <span class="row-end">
+            {% if listing.is_active %}
+              <small>&#1040;&#1082;&#1090;&#1080;&#1074;&#1085;&#1086;</small>
+            {% else %}
+              <small>&#1053;&#1077; &#1072;&#1082;&#1090;&#1080;&#1074;&#1085;&#1086;</small>
+            {% endif %}
+            &rarr;
+          </span>
+        </a>
+      {% empty %}
+        <div class="empty-inline">
+          &#1042;&#1099; &#1087;&#1086;&#1082;&#1072; &#1085;&#1077; &#1088;&#1072;&#1079;&#1084;&#1077;&#1097;&#1072;&#1083;&#1080; &#1090;&#1086;&#1074;&#1072;&#1088;&#1099; &#1080;&#1083;&#1080; &#1091;&#1089;&#1083;&#1091;&#1075;&#1080;.
+          <a href="{% url 'supplier_listing_create' %}">&#1056;&#1072;&#1079;&#1084;&#1077;&#1089;&#1090;&#1080;&#1090;&#1100; &#1086;&#1073;&#1098;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077;</a>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<div class="dashboard-panel" style="margin-top: 1.5rem;">
+  <h2>Оптовые заказы</h2>
+  <p>Просматривайте заказы, следите за статусами и управляйте поставками.</p>
+  <a class="btn btn-primary" href="{% url 'order_list' %}">Мои заказы</a>
+</div>
+
+{% endblock %}

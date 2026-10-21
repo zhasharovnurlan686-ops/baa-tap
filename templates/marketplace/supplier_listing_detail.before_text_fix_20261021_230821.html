@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} — BaaTap KG{% endblock %}
+
+{% block content %}
+<section class="section supplier-detail-section">
+  <div class="container supplier-detail-container">
+    <a class="supplier-back-link" href="{% url 'supplier_listing_list' %}">← Вернуться к каталогу</a>
+
+    <article class="supplier-detail-card">
+      <div class="supplier-detail-main">
+        <div class="eyebrow">{{ listing.category.name_ru }}</div>
+        <h1>{{ listing.title }}</h1>
+        <div class="supplier-detail-meta">
+          <span class="pill">{{ listing.category.name_ru }}</span>
+          <span>Опубликовано {{ listing.created_at|date:"d.m.Y" }}</span>
+        </div>
+
+        {% if listing.image_url %}
+          <div class="supplier-detail-image">
+            <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+          </div>
+        {% endif %}
+
+        <div class="supplier-description-block">
+          <h2>Описание предложения</h2>
+          <div class="supplier-full-description">{{ listing.description|linebreaksbr }}</div>
+        </div>
+      </div>
+
+      <aside class="supplier-detail-sidebar">
+        {% if can_view_b2b_details %}
+<div class="supplier-price-panel supplier-detail-price">
+          <span>Стоимость</span>
+          <strong>
+            {% if listing.price != None %}
+              {{ listing.price|floatformat:"-2" }} <small>сом</small>
+            {% else %}
+              По договорённости
+            {% endif %}
+          </strong>
+        </div>
+{% else %}
+<div class="supplier-price-panel"><span>??????? ?????????</span><strong>???????? ?????????????? ?????????</strong></div>
+{% endif %}
+
+        <div class="supplier-detail-facts">
+          {% if can_view_b2b_details %}
+{% if listing.quantity %}
+            <div class="supplier-detail-fact"><span>Количество</span><strong>{{ listing.quantity }}</strong></div>
+          {% endif %}
+{% endif %}
+          <div class="supplier-detail-fact"><span>Город</span><strong>{{ listing.city|default:listing.supplier.city|default:"Кыргызстан" }}</strong></div>
+        </div>
+
+        <div class="supplier-contact-panel">
+          <span class="supplier-muted-label">Поставщик</span>
+          <h3>{{ listing.supplier.company_name|default:listing.supplier.get_full_name|default:listing.supplier.username }}</h3>
+          {% if listing.supplier.city %}
+            <p>{{ listing.supplier.city }}</p>
+          {% endif %}
+
+          {% if listing.supplier.phone %}
+            <a class="btn btn-primary btn-block" target="_blank" rel="noopener"
+               href="https://wa.me/{{ listing.supplier.phone|cut:' '|cut:'+'|cut:'-'|cut:'('|cut:')' }}">
+              Связаться в WhatsApp →
+            </a>
+          {% else %}
+            <p>Контактный телефон поставщика пока не указан.</p>
+          {% endif %}
+        </div>
+      </aside>
+    </article>
+  </div>
+</section>
+{% endblock %}

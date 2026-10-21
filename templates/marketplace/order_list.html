@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Оптовые заказы — BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1>Оптовые заказы</h1>
+    <div class="dashboard-panel">
+      {% for order in orders %}
+        <a class="dashboard-row" href="{% url 'order_detail' order.pk %}">
+          <span class="dashboard-row-main">
+            <b>Заказ №{{ order.pk }}</b>
+            <small>
+              {{ order.get_status_display }} · {{ order.created_at|date:"d.m.Y H:i" }}
+              · Покупатель: {{ order.buyer.company_name|default:order.buyer.username }}
+              · Поставщик: {{ order.supplier.company_name|default:order.supplier.username }}
+            </small>
+          </span>
+        </a>
+      {% empty %}
+        <p>Оптовых заказов пока нет.</p>
+        <a class="btn btn-primary" href="{% url 'supplier_listing_list' %}">Перейти в каталог поставщиков</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

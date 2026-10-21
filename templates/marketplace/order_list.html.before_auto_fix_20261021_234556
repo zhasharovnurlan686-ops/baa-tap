@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}??? ??????? ?????? ? BaaTap KG{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1>??????? ??????</h1>
+    <div class="dashboard-panel">
+      {% for order in orders %}
+        <a class="dashboard-row" href="{% url 'order_detail' order.pk %}">
+          <span class="dashboard-row-main">
+            <b>????? ?{{ order.pk }}</b>
+            <small>
+              {{ order.get_status_display }} ? {{ order.created_at|date:"d.m.Y H:i" }}
+              ? ??????????: {{ order.buyer.company_name|default:order.buyer.username }}
+              ? ?????????: {{ order.supplier.company_name|default:order.supplier.username }}
+            </small>
+          </span>
+          <span class="row-end">{{ order.total_amount|floatformat:2 }} ??? ?</span>
+        </a>
+      {% empty %}
+        <p>??????? ???? ???.</p>
+        <a class="btn btn-primary" href="{% url 'supplier_listing_list' %}">??????? ???????</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

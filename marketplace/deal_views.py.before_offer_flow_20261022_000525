@@ -1,0 +1,84 @@
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from .models import BusinessRequest, Offer, Order
+
+
+@login_required
+def request_offers(request, pk):
+    business_request = get_object_or_404(BusinessRequest, pk=pk)
+
+    if not request.user.is_staff and business_request.buyer_id != request.user.pk:
+        from django.http import Http404
+        raise Http404
+
+    offers = Offer.objects.filter(
+        request_id=business_request.pk
+    ).select_related("supplier").order_by("-created_at")
+
+    return render(request, "marketplace/request_offers.html", {
+        "business_request": business_request,
+        "offers": offers,
+    })
+
+
+@login_required
+@require_POST
+def accept_offer(request, pk):
+    with transaction.atomic():
+        offer = get_object_or_404(
+            Offer.objects.select_for_update().select_related(
+                "request", "supplier"
+            ),
+            pk=pk,
+        )
+        business_request = offer.request
+
+        if not request.user.is_staff and business_request.buyer_id != request.user.pk:
+            from django.http import Http404
+            raise Http404
+
+        if offer.status != "pending":
+            messages.error(request, "Это предложение уже обработано.")
+            return redirect("request_offers", pk=business_request.pk)
+
+        existing = Order.objects.filter(offer=offer).first()
+        if existing:
+            messages.info(request, "Заказ по этому предложению уже существует.")
+            return redirect("order_detail", pk=existing.pk)
+
+        if offer.price is None or offer.price <= Decimal("0"):
+            messages.error(request, "У предложения должна быть положительная цена.")
+            return redirect("request_offers", pk=business_request.pk)
+
+        order = Order.objects.create(
+            buyer=business_request.buyer,
+            supplier=offer.supplier,
+            status=Order.Status.NEW,
+            total_amount=offer.price,
+            buyer_note=(
+                "Заказ создан из заявки №"
+                + str(business_request.pk)
+                + ". Коммерческое предложение №"
+                + str(offer.pk)
+                + "."
+            ),
+            business_request=business_request,
+            offer=offer,
+        )
+
+        offer.status = "accepted"
+        offer.save(update_fields=["status"])
+
+        Offer.objects.filter(
+            request_id=business_request.pk,
+            status="pending",
+        ).exclude(pk=offer.pk).update(status="rejected")
+
+    messages.success(request, "Предложение принято. Создан заказ №" + str(order.pk) + ".")
+    return redirect("order_detail", pk=order.pk)

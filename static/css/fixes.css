@@ -1,0 +1,433 @@
+/* BaaTap KG: dashboard layout fixes */
+.dashboard-panel {
+    min-width: 0;
+}
+
+.dashboard-panel .panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dashboard-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dashboard-row-main {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dashboard-row-main b {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-row-main small {
+    display: block;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+.dashboard-row .row-end {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.count-badge {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+    .dashboard-row {
+        gap: 10px;
+    }
+
+    .dashboard-row .row-end {
+        gap: 5px;
+    }
+
+    .dashboard-row-main small {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Supplier catalog styles: begin */
+.supplier-catalog-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.supplier-catalog-card h3 {
+    margin: 12px 0 8px;
+    overflow-wrap: anywhere;
+}
+
+.supplier-catalog-description {
+    line-height: 1.65;
+}
+
+.supplier-catalog-image {
+    display: block;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.supplier-catalog-price {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 12px 0;
+    padding: 16px;
+    background: #f3f7fc;
+    border: 1px solid #e5eaf0;
+    border-radius: 12px;
+}
+
+.supplier-catalog-price span,
+.supplier-catalog-facts span {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.supplier-catalog-price strong {
+    color: #12345a;
+    font-size: 21px;
+    overflow-wrap: anywhere;
+}
+
+.supplier-catalog-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #e5eaf0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.supplier-catalog-facts strong {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.supplier-catalog-owner {
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+.supplier-catalog-button {
+    margin-top: 12px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .supplier-catalog-facts {
+        grid-template-columns: 1fr;
+    }
+}
+/* Supplier catalog styles: end */
+
+
+
+/* BaaTap KG — premium supplier catalog */
+.supplier-hero .supplier-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.supplier-catalog-section { padding-top: 32px; }
+.supplier-filter {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(150px, 1fr) minmax(120px, .8fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 38px;
+}
+.supplier-filter input,
+.supplier-filter select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+.supplier-results-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.supplier-results-heading h2 {
+  margin: 6px 0 0;
+  font-size: clamp(23px, 3vw, 32px);
+  letter-spacing: -.6px;
+}
+.supplier-grid { align-items: stretch; }
+.supplier-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 !important;
+  border: 1px solid rgba(100, 130, 160, .20);
+  border-radius: 20px !important;
+  background: var(--card, #fff);
+  box-shadow: 0 8px 28px rgba(20, 42, 68, .055);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.supplier-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(28, 169, 255, .45);
+  box-shadow: 0 16px 38px rgba(20, 42, 68, .12);
+}
+.supplier-card-image {
+  display: block;
+  height: 210px;
+  overflow: hidden;
+  background: #eef4f9;
+  text-decoration: none;
+}
+.supplier-card-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.supplier-card:hover .supplier-card-image img { transform: scale(1.035); }
+.supplier-image-placeholder {
+  display: flex;
+  height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: space-between;
+  background: radial-gradient(circle at 80% 20%, rgba(88, 217, 255, .24), transparent 38%), linear-gradient(135deg, #0b1c34, #123d62);
+  color: white;
+}
+.supplier-image-placeholder span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #58d9ff;
+}
+.supplier-image-placeholder strong {
+  font-size: 22px;
+  line-height: 1.25;
+}
+.supplier-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 20px;
+  min-width: 0;
+}
+.supplier-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+.supplier-date { color: #8290a2; font-size: 12px; }
+.supplier-card-title {
+  margin: 0 0 10px;
+  font-size: 19px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.supplier-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.supplier-card-title a:hover { color: #168fe0; }
+.supplier-card-description {
+  margin: 0 0 18px;
+  color: #68778a;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.supplier-company {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 0 16px;
+  border-top: 1px solid rgba(100, 130, 160, .16);
+}
+.supplier-company-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: #e9f6ff;
+  color: #0878bd;
+  font-size: 11px;
+  font-weight: 800;
+}
+.supplier-company > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.supplier-company strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.supplier-muted-label { color: #8290a2; font-size: 12px; }
+.supplier-price-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 15px 16px;
+  border: 1px solid rgba(28, 169, 255, .15);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0f9ff, #f8fcff);
+}
+.supplier-price-panel > span { color: #68778a; font-size: 12px; }
+.supplier-price-panel > strong {
+  color: #0b4774;
+  font-size: clamp(21px, 2vw, 26px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.supplier-price-panel small { font-size: 13px; font-weight: 600; }
+.supplier-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 13px 0 18px;
+}
+.supplier-fact {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 11px 9px;
+  border: 1px solid rgba(100, 130, 160, .15);
+  border-radius: 12px;
+}
+.supplier-fact-symbol { color: #168fe0; font-size: 20px; }
+.supplier-fact > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.supplier-fact > div span { color: #8290a2; font-size: 11px; }
+.supplier-fact > div strong { font-size: 13px; overflow-wrap: anywhere; }
+.supplier-details-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  text-decoration: none;
+}
+.supplier-details-button span { font-size: 19px; }
+.supplier-empty { grid-column: 1 / -1; }
+.supplier-detail-container { max-width: 1120px; }
+.supplier-back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #168fe0;
+  text-decoration: none;
+  font-weight: 600;
+}
+.supplier-back-link:hover { text-decoration: underline; }
+.supplier-detail-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(270px, .8fr);
+  gap: 32px;
+  padding: clamp(20px, 4vw, 40px);
+  border: 1px solid rgba(100, 130, 160, .2);
+  border-radius: 22px;
+  background: var(--card, #fff);
+  box-shadow: 0 12px 40px rgba(20, 42, 68, .07);
+}
+.supplier-detail-main { min-width: 0; }
+.supplier-detail-main h1 {
+  margin: 10px 0 16px;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.2;
+  letter-spacing: -1px;
+  overflow-wrap: anywhere;
+}
+.supplier-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  color: #8290a2;
+  font-size: 13px;
+}
+.supplier-detail-image {
+  margin: 20px 0 28px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f2f6fa;
+}
+.supplier-detail-image img {
+  display: block;
+  width: 100%;
+  max-height: 480px;
+  object-fit: contain;
+}
+.supplier-description-block h2 { font-size: 21px; margin: 0 0 12px; }
+.supplier-full-description {
+  color: #58687b;
+  font-size: 15px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.supplier-detail-sidebar { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.supplier-detail-price > strong { font-size: 30px; }
+.supplier-detail-facts {
+  padding: 4px 16px;
+  border: 1px solid rgba(100, 130, 160, .17);
+  border-radius: 14px;
+}
+.supplier-detail-fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(100, 130, 160, .14);
+}
+.supplier-detail-fact:last-child { border-bottom: 0; }
+.supplier-detail-fact span { color: #8290a2; font-size: 13px; }
+.supplier-detail-fact strong { text-align: right; overflow-wrap: anywhere; }
+.supplier-contact-panel {
+  padding: 20px;
+  border-radius: 16px;
+  background: #f5f8fb;
+}
+.supplier-contact-panel h3 { margin: 8px 0; font-size: 18px; overflow-wrap: anywhere; }
+.supplier-contact-panel p { color: #68778a; font-size: 13px; }
+.supplier-contact-panel .btn { margin-top: 14px; }
+@media (max-width: 760px) {
+  .supplier-filter { grid-template-columns: 1fr; }
+  .supplier-hero .supplier-hero-actions { flex-direction: column; align-items: stretch; }
+  .supplier-hero-actions .btn { text-align: center; }
+  .supplier-detail-card { grid-template-columns: 1fr; gap: 24px; padding: 20px; }
+  .supplier-detail-sidebar { order: -1; }
+  .supplier-card-image { height: 190px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .supplier-card, .supplier-card-image img { transition: none; }
+}
