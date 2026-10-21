@@ -12,3 +12,12 @@ media/
 .DS_Store
 .idea/
 .vscode/
+# Local backups
+*.bak
+*.backup
+*.before_*
+*.backup_*
+*.encoding-backup
+*.whatsapp-backup
+*.before_encoding_repair_*
+*.before_russian_fix_*
